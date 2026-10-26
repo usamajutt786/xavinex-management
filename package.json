@@ -1,0 +1,12 @@
+{
+  "name": "xavinex-management-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "node backend/dev.js",
+    "start": "node backend/server.js",
+    "install:all": "npm --prefix backend ci && npm --prefix xavinex-management ci",
+    "test": "npm --prefix backend test && npm --prefix xavinex-management run lint",
+    "test:e2e": "npm --prefix backend run test:e2e",
+    "build": "npm --prefix xavinex-management run build"
+  }
+}

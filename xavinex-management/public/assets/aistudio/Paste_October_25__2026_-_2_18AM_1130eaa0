@@ -1,0 +1,1287 @@
+# XAVINEX MANAGEMENT — COMPLETE SYSTEM UPDATE AND DEVELOPMENT PROMPT
+
+## 1. Project Overview
+
+Update the existing application named **Xavinex Management** into a fully functional financial, client, project, and business management system.
+
+Do not create an unrelated application or replace existing functionality unnecessarily. Maintain the existing design structure and enhance the system according to the requirements below.
+
+The system must allow the admin to manage:
+
+- Clients and their linked Fiverr accounts
+- Projects and monthly business bookings
+- Client payments and outstanding balances
+- Multiple Fiverr and Payoneer accounts
+- Bank accounts and business petty cash
+- Transfers between financial accounts
+- Manually editable account balances
+- Company expenses
+- Financial performance reports
+- Interactive dashboards, line graphs, and other charts
+- Historical financial data and transaction records
+
+All information must come from actual records manually entered by the admin.
+
+The application is for one administrator only. No additional user roles are required.
+
+---
+
+## 2. CRITICAL: REMOVE ALL DUMMY DATA
+
+Remove all existing dummy data, sample records, placeholder financial values, and automatically generated demonstration transactions from the application.
+
+This includes:
+
+- Dummy clients
+- Sample projects
+- Example Fiverr accounts
+- Example Payoneer accounts
+- Sample bank accounts
+- Sample cash wallets
+- Dummy payments
+- Sample transfers
+- Demo expenses
+- Fake account balances
+- Hardcoded revenue figures
+- Fake transaction histories
+- Static chart datasets
+- Placeholder financial statistics
+
+### Mandatory Rules
+
+1. The system must initially contain zero business records.
+2. All account balances must initially be zero unless manually entered.
+3. The admin will manually create every Fiverr, Payoneer, bank, and cash account.
+4. No predefined client or project records should exist.
+5. No sample transactions should automatically appear.
+6. Dashboards must calculate values exclusively from saved database records.
+7. Charts must use actual transaction, project, payment, and expense data.
+8. When there is no data, show a professional empty state rather than fictional figures.
+9. Do not automatically recreate sample data when refreshing, rebuilding, or restarting the application.
+10. Do not populate demonstration data through database seed scripts in the normal application environment.
+
+If existing records belong to a real user rather than sample data, distinguish them from dummy records and preserve them unless explicitly confirmed for deletion.
+
+### Empty Dashboard Behavior
+
+When the system is first opened, show:
+
+- Total Business Booked: $0
+- Payments Received: $0
+- Outstanding Payments: $0
+- Total Expenses: $0
+- Available Balance: $0
+- Total Clients: 0
+- Total Projects: 0
+
+Charts should display helpful messages such as:
+
+"No financial data available. Start by adding an account or recording a transaction."
+
+Do not use artificial data to make the dashboard appear populated.
+
+---
+
+## 3. Account Management
+
+The administrator must be able to create, edit, deactivate, and manage financial accounts.
+
+### Supported Account Types
+
+1. Fiverr Accounts
+2. Payoneer Accounts
+3. Bank Accounts
+4. Business Petty Cash Accounts
+
+Each account must have:
+
+- Account ID
+- Account name
+- Account type
+- Currency
+- Opening balance
+- Current calculated balance
+- Status
+- Creation date
+- Description or notes
+
+### Example Account Names
+
+Fiverr accounts may be named Salman, Osama, Hassan, etc.
+
+Payoneer accounts may be named Abdur Rahman, Salman, Osama, etc.
+
+These are naming examples only. Do not add them automatically to the database.
+
+### Editable Account Balances
+
+All account balances must be manageable through the application.
+
+The admin must be able to:
+
+- Enter an opening balance while creating an account.
+- Edit an incorrectly entered opening balance.
+- Manually adjust the current balance when necessary.
+- Increase or decrease a balance through a correction.
+- View the current balance.
+- View the historical balance.
+- View all transactions affecting that account.
+
+### Important Balance Adjustment Logic
+
+Do not directly overwrite current balances without recording an adjustment.
+
+When the admin manually changes a balance, create a balance adjustment transaction.
+
+For example:
+
+Current Payoneer balance: $1,000
+
+Admin manually corrects the balance to $1,200.
+
+The system must:
+
+- Update the displayed balance to $1,200.
+- Record a +$200 adjustment.
+- Save the date and reason for adjustment.
+- Preserve previous transactions.
+- Recalculate historical reporting correctly.
+
+If the admin changes the balance from $1,000 to $800, record a -$200 adjustment.
+
+Provide an easy-to-use **Edit Balance** button on every financial account page.
+
+Show the current balance, new balance, calculated difference, reason, and confirmation before saving.
+
+The application should calculate balances from opening balances plus and minus recorded transactions and adjustments.
+
+---
+
+## 4. Client Management and Automatic Fiverr Linking
+
+Every client must have a permanent profile.
+
+### Create Client
+
+Required fields:
+
+- Client name
+- Fiverr account (required dropdown)
+- Client status
+
+Optional fields:
+
+- Client Fiverr username
+- Company name
+- Email
+- Country
+- Phone
+- Description
+- Notes
+
+### Client-to-Fiverr Account Relationship
+
+When creating a client, the admin must select the Fiverr account associated with that client.
+
+This association must be stored permanently until the admin changes it.
+
+### Automatic Fiverr Account Selection for Projects
+
+When a new project is created and an existing client is selected:
+
+1. Retrieve that client's linked Fiverr account automatically.
+2. Associate the new project with that Fiverr account.
+3. Display the linked account as read-only information.
+4. Do not require the admin to select the Fiverr account again.
+5. Store the linked Fiverr account ID on the project.
+
+Example:
+
+Client: Abdur Rahman
+
+Linked Fiverr Account: Salman
+
+New Project: Website Development
+
+The project must automatically use Salman — Fiverr Account.
+
+### Client Account Changes
+
+If an admin later changes a client's linked Fiverr account, apply the new association to future projects.
+
+Do not silently modify the Fiverr account assigned to previous projects or financial transactions.
+
+Historical project records must preserve the account originally associated with each project.
+
+### Client Profile
+
+Each profile should show:
+
+- Client name
+- Linked Fiverr account
+- Client status
+- Total booked business
+- Total payments received
+- Outstanding balance
+- Active projects
+- Completed projects
+- Total project count
+- First project date
+- Most recent project date
+- Complete project history
+- Payment history
+- Monthly business trend
+
+Completed clients must remain available when creating new projects.
+
+Prevent accidental duplicate client profiles.
+
+---
+
+## 5. Project Management and Business Booking
+
+Each project belongs to one client.
+
+### Create Project Fields
+
+- Project name
+- Select client
+- Automatically linked Fiverr account
+- Agreed project budget
+- Currency
+- Booking date
+- Expected completion date
+- Project status
+- Description
+- Notes
+
+### Project Status
+
+- Queued
+- In Progress
+- On Hold
+- Completed
+- Cancelled
+
+### Payment Status
+
+- Unpaid
+- Partially Paid
+- Fully Paid
+
+Payment status and project completion status must remain independent.
+
+### Monthly Business Bookings
+
+Use the project booking date to calculate monthly business.
+
+Example:
+
+January:
+
+Client A places a $2,000 order.
+
+February:
+
+The same client places a $3,000 order.
+
+Expected:
+
+- January business booked: $2,000
+- February business booked: $3,000
+- Client lifetime business: $5,000
+
+Do not attribute February business to January simply because the client was originally created in January.
+
+### Project Financial Tracking
+
+Every project must show:
+
+- Agreed budget
+- Total payments received
+- Remaining outstanding balance
+- Payment progress percentage
+- Linked Fiverr account
+- Client
+- Financial transaction history
+
+Outstanding project balance must decrease whenever a valid client payment is recorded.
+
+---
+
+## 6. Client Payment Recording Workflow
+
+Implement a dedicated **Record Client Payment** interface.
+
+The system must support payments that are recorded against a project and credited to a selected Payoneer account.
+
+### Payment Form
+
+Fields:
+
+- Select Client
+- Select Project
+- Linked Fiverr Account (automatically retrieved)
+- Payment Amount
+- Payment Currency
+- Payment Date
+- Receiving Account
+- Payment Route
+- Actual Credited Amount
+- Fee or Deduction (if applicable)
+- Transaction Description
+- Notes
+
+### Payment Routes
+
+Support two distinct ways to receive client money.
+
+**Route A: Client Payment Recorded in Fiverr**
+
+The client payment is credited to the associated Fiverr account.
+
+The admin may later transfer it from Fiverr to Payoneer using the transfer module.
+
+**Route B: Client Payment Credited Directly to Payoneer**
+
+The admin records that a client's payment was received directly in a selected Payoneer account.
+
+The project remains associated with its original Fiverr account for attribution, but the payment is credited to Payoneer rather than Fiverr.
+
+This route must not artificially create a Fiverr balance or a separate Fiverr-to-Payoneer transfer.
+
+### Example: Direct Payoneer Payment
+
+Client: Abdur Rahman
+
+Linked Fiverr Account: Salman
+
+Project Payment: $200
+
+Receiving Account: Abdur Rahman — Payoneer
+
+Actual amount credited: $200
+
+Expected result:
+
+1. Record a $200 payment for the selected project.
+2. Decrease the project's outstanding amount by $200.
+3. Increase Abdur Rahman's Payoneer balance by $200.
+4. Update the client's payment history.
+5. Record the linked Fiverr account as attribution only.
+6. Do not increase Salman Fiverr's financial balance.
+7. Do not create an additional internal transfer.
+8. Reflect this payment in the selected month's collections.
+
+### Example: Payment With Deduction
+
+Client pays $200.
+
+Receiving Payoneer account receives $190.
+
+The system must support:
+
+- Gross client payment: $200
+- Actual credited amount: $190
+- Deduction: $10
+- Deduction percentage: 5%
+
+The project's outstanding amount decreases by the gross settled payment of $200.
+
+The selected Payoneer balance increases by $190.
+
+The $10 difference should be classified as a fee, deduction, or other adjustment.
+
+The system must not count the deduction twice.
+
+### Payment Validation
+
+- Payment amount must be positive.
+- Selected project must belong to the selected client.
+- Linked Fiverr account must be retrieved automatically.
+- Payoneer receiving accounts must come from accounts created by the admin.
+- Prevent accidental duplicate payment recording.
+- Show actual account balance changes before confirmation.
+- Support partial payments.
+- Prevent payments exceeding the project balance unless an explicit advance-payment process is used.
+
+---
+
+## 7. Account Transfer Rules
+
+Implement a complete Fund Transfers module.
+
+### Mandatory Allowed Transfers
+
+- Fiverr → Payoneer: Allowed
+- Payoneer → Payoneer: Allowed
+
+### Mandatory Prohibited Transfer
+
+- Fiverr → Fiverr: Not Allowed
+
+The system must prevent Fiverr-to-Fiverr transfers in both the user interface and backend validation.
+
+For the broader finance module, also support:
+
+- Payoneer → Bank
+- Bank → Bank
+- Bank → Business Petty Cash
+- Business Petty Cash → Bank
+
+These additional transfer routes must follow explicit configuration rules.
+
+Do not permit unsupported combinations automatically.
+
+### Dynamic Dropdown Behavior
+
+When the selected source account is Fiverr:
+
+- Show eligible Payoneer accounts as destinations.
+- Do not show another Fiverr account.
+- Do not show the same account as its destination.
+
+When the selected source account is Payoneer:
+
+- Show eligible Payoneer accounts.
+- Show bank destinations where supported.
+- Exclude the same source account.
+
+When the source changes, refresh the eligible destination list.
+
+Do not allow inactive accounts to be used in new transfers.
+
+---
+
+## 8. Transfer Interface and Account Identification
+
+The transfer screen must clearly separate:
+
+### Source Account — Transfer From
+
+Display:
+
+- Account name
+- Account type
+- Currency
+- Current available balance
+
+### Destination Account — Transfer To
+
+Display:
+
+- Account name
+- Account type
+- Currency
+- Current available balance
+
+Account type must always be visible beside the account name.
+
+Example dropdown labels:
+
+- Salman — Fiverr Account
+- Osama — Fiverr Account
+- Abdur Rahman — Payoneer Account
+- Salman — Payoneer Account
+
+Do not display only the person's name.
+
+Use distinct account-type icons or neutral visual labels to help avoid selecting the wrong account.
+
+### Transfer Form
+
+Fields:
+
+- Source Account
+- Destination Account
+- Transfer Date
+- Source Amount
+- Destination Credited Amount
+- Source Currency
+- Destination Currency
+- Fee or Deduction
+- Deduction Category
+- Notes
+
+### Live Transfer Preview
+
+Before saving a transfer, show:
+
+- Source current balance
+- Source amount being deducted
+- Source projected balance
+- Destination current balance
+- Destination credited amount
+- Destination projected balance
+- Difference
+- Deduction percentage, where applicable
+- Effective exchange rate, where applicable
+
+The user must confirm the transaction before it is recorded.
+
+---
+
+## 9. Transfer Calculations
+
+The source amount and destination credited amount must be entered separately.
+
+Do not assume they are identical.
+
+### Example A: Fiverr to Payoneer
+
+Source: Salman — Fiverr Account
+
+Destination: Abdur Rahman — Payoneer Account
+
+Source amount: $200
+
+Destination amount: $160
+
+Calculate:
+
+Difference = $200 - $160 = $40
+
+Deduction percentage = ($40 / $200) × 100 = 20%
+
+Expected result:
+
+- Salman Fiverr decreases by $200.
+- Abdur Rahman Payoneer increases by $160.
+- Deduction recorded: $40.
+- Deduction percentage shown: 20%.
+- Both accounts' transaction histories update.
+
+The $40 deduction should appear in the financial fee/loss reporting exactly once.
+
+### Example B: Payoneer to Payoneer
+
+Source: Osama — Payoneer Account
+
+Destination: Abdur Rahman — Payoneer Account
+
+Source amount: $100
+
+Destination credited: $80
+
+Expected result:
+
+- Source decreases by $100.
+- Destination increases by $80.
+- Difference: $20.
+- Deduction: 20%.
+
+### Example C: Currency Conversion
+
+Source account currency: USD
+
+Destination account currency: PKR
+
+Source amount: $100
+
+Destination credited amount: PKR 27,500
+
+Effective exchange rate = 275 PKR per USD.
+
+Show the conversion rate rather than treating PKR and USD amounts as directly comparable.
+
+For different-currency transfers, fees should be entered separately or compared against an explicitly supplied reference exchange rate.
+
+### Duplicate and Balance Validation
+
+The system must:
+
+- Reject invalid transfer combinations.
+- Reject zero or negative source amounts.
+- Prevent transfers exceeding the available source balance.
+- Prevent self-transfers.
+- Prevent accidental duplicate submissions.
+- Require valid destination accounts.
+- Update both account balances atomically.
+- Maintain an auditable record of the transfer.
+
+---
+
+## 10. Complete Transaction History
+
+Every financial account must have its own transaction ledger.
+
+### Transaction Information
+
+- Transaction ID
+- Transaction date and time
+- Transaction type
+- Source account name
+- Source account type
+- Destination account name
+- Destination account type
+- Source amount
+- Destination amount
+- Currency
+- Difference
+- Fees
+- Deduction percentage
+- Exchange rate
+- Associated client
+- Associated project
+- Transaction notes
+- Created timestamp
+- Last updated timestamp
+
+### Transaction Types
+
+- Opening Balance
+- Client Payment
+- Internal Transfer
+- Expense
+- Fee or Deduction
+- Manual Balance Adjustment
+- Refund
+- Transaction Reversal
+
+### Transaction History Interface
+
+Provide:
+
+- Search
+- Date filters
+- Account filters
+- Transaction type filters
+- Client filters
+- Project filters
+- Sorting
+- CSV export
+- Transaction detail modal
+
+Allow financial corrections through proper adjustment or reversal records.
+
+Do not silently delete financial history.
+
+---
+
+## 11. Account Balances and Consolidated Funds
+
+Create an Accounts Overview dashboard.
+
+Display:
+
+- Total Fiverr balances
+- Total Payoneer balances
+- Total bank balances
+- Total business petty cash
+- Grand total of all available funds
+
+Each account should have a card showing:
+
+- Account name
+- Account type
+- Current balance
+- Currency
+- Monthly inflow
+- Monthly outflow
+- Balance growth percentage
+- Edit Balance action
+- View Transactions action
+
+### Multi-Currency Reporting
+
+Allow accounts to have different currencies.
+
+Use USD as the default reporting currency.
+
+Provide manually editable exchange rates in Settings.
+
+Convert balances into the reporting currency before calculating the grand total.
+
+Always display the rate and date used for conversion.
+
+Do not directly sum USD and PKR amounts without conversion.
+
+### Balance History
+
+Maintain accurate account balances over time.
+
+Every account must have a line graph showing historical balance movements.
+
+The chart should support:
+
+- Daily balance
+- Weekly balance
+- Monthly balance
+- Month-end balance
+- Custom date range
+
+Manually entered balance adjustments must also be reflected in historical reporting based on their effective dates.
+
+---
+
+## 12. Expense Management
+
+Preserve the full existing expense management module.
+
+### Expense Categories
+
+1. Human Resources
+2. Food and Refreshments
+3. Utilities and Office Operations
+4. Executive Expenses
+5. Office Assets and Equipment
+6. Platform and Transaction Fees
+7. Software and Subscriptions
+8. Other Expenses
+
+Allow custom categories.
+
+### Add Expense Form
+
+- Expense title
+- Category
+- Subcategory
+- Amount
+- Currency
+- Date
+- Paying financial account
+- Description
+- Optional receipt
+- Notes
+
+### Expense Accounting
+
+When an expense is recorded:
+
+1. Subtract it from the selected financial account.
+2. Add it to monthly company expenses.
+3. Update the relevant expense category.
+4. Update the dashboard.
+5. Update financial graphs.
+6. Preserve the expense transaction history.
+
+If an expense is edited, properly reverse or adjust the original posting to prevent incorrect balances.
+
+Expense payments must be linked to the actual Fiverr, Payoneer, bank, or cash account from which they were paid.
+
+---
+
+## 13. Dashboard and Charts — Include Line Graphs
+
+Update the existing dashboard with more comprehensive financial visualizations.
+
+Line graphs must be used prominently throughout the system, alongside bar charts, area charts, and donut charts.
+
+### Dashboard KPI Cards
+
+- Business Booked This Month
+- Business Booked This Year
+- Client Payments Received
+- Outstanding Client Payments
+- Active Project Backlog
+- Available Business Funds
+- Total Fiverr Balance
+- Total Payoneer Balance
+- Total Bank Balance
+- Total Monthly Expenses
+- Monthly Net Cash Flow
+- Total Transfer Deductions
+- New Clients
+- Returning Clients
+- Active Projects
+- Completed Projects
+
+All cards must derive their values from manually entered database records.
+
+### Required Charts
+
+**1. Monthly Business Booked**
+
+Line graph with months on the X-axis and booked business on the Y-axis.
+
+Include comparison with previous months.
+
+**2. Monthly Client Payments Received**
+
+Line graph showing actual client payments collected over time.
+
+**3. Monthly Business Booked vs Payments Received**
+
+Dual-line chart comparing contracted business with collected payments.
+
+**4. Monthly Expenses**
+
+Line graph tracking company expenses month by month.
+
+**5. Inflow vs Outflow**
+
+Multi-line chart showing actual external inflows and outflows.
+
+Also offer a stacked bar view.
+
+**6. Net Cash Flow**
+
+Area and line chart showing net operating cash movement.
+
+**7. Transfer Deduction Percentage**
+
+Line graph showing changes in average deduction percentages over time.
+
+Include Fiverr-to-Payoneer and Payoneer-to-Payoneer filters.
+
+**8. Currency Conversion Trends**
+
+Line graph displaying actual effective conversion rates between currencies.
+
+**9. Fiverr Account Balance Trends**
+
+Multi-line graph comparing the balances of different Fiverr accounts.
+
+**10. Payoneer Account Balance Trends**
+
+Multi-line graph comparing Payoneer account balances.
+
+Each account should have its own independently identifiable series.
+
+**11. Month-End Account Balances**
+
+Historical line graph showing balances at the end of each month.
+
+**12. Total Available Funds**
+
+Line or area graph showing the growth or decline of company funds.
+
+**13. Outstanding Business**
+
+Line or area graph tracking unpaid project receivables.
+
+**14. Expense Category Distribution**
+
+Donut chart showing the proportions of expenses by category.
+
+**15. Expense Category Trends**
+
+Multi-line graph showing HR, utilities, food, executive and other expense categories over time.
+
+**16. Top Clients by Business Value**
+
+Horizontal bar chart showing top clients.
+
+**17. Fiverr Account Performance**
+
+Grouped bar chart comparing business booked and client payments received by Fiverr account.
+
+**18. New vs Returning Client Business**
+
+Stacked bar chart, with an optional line graph view.
+
+**19. Client Lifetime Business Growth**
+
+Line graph available inside individual client profiles.
+
+**20. Project Payment Collection Progress**
+
+Progress chart showing collected amounts versus outstanding amounts.
+
+### Chart Requirements
+
+Every chart must support:
+
+- Daily, weekly, monthly, quarterly and yearly views where relevant
+- Custom date selection
+- Interactive hover tooltips
+- Currency formatting
+- Proper legends
+- Multiple account comparisons
+- Responsive layouts
+- Smooth transitions
+- CSV or image export where feasible
+- Accurate historical data
+- Meaningful empty states
+
+When no data exists, render an empty graph with a clear message. Never inject fabricated records.
+
+---
+
+## 14. Reports and Financial Analysis
+
+Provide these reports:
+
+- Monthly Business Booking
+- Monthly Client Collections
+- Outstanding Payments
+- Client Lifetime Value
+- Fiverr Account Performance
+- Payoneer Account Performance
+- Financial Account Balances
+- Transfer History
+- Transfer Fees and Deductions
+- Monthly Expenses
+- Expense Categories
+- Net Cash Flow
+- Historical Month-End Balances
+- Annual Financial Summary
+
+Reports must be filterable by date, account, client, and transaction category.
+
+Allow CSV exports and PDF exports where feasible.
+
+---
+
+## 15. Important Financial Rules
+
+Implement these rules throughout the application.
+
+1. Creating a project increases booked business and receivables, not available funds.
+2. Recording a payment increases collected payments and reduces outstanding receivables.
+3. Payments credited directly to Payoneer increase only the selected Payoneer balance.
+4. Payments received through Fiverr increase the associated Fiverr balance.
+5. The client's linked Fiverr account is automatically assigned to newly created projects.
+6. Changing the client's linked Fiverr account must not rewrite historical projects.
+7. Transfers reduce the source account and increase the destination account by their respective amounts.
+8. Fiverr-to-Fiverr transfers are prohibited.
+9. Payoneer-to-Payoneer transfers are allowed.
+10. Fiverr-to-Payoneer transfers are allowed.
+11. Internal transfers never count as new company revenue.
+12. Same-currency transfer differences must be recorded as deductions, fees, or adjustments.
+13. Currency conversions must show effective rates.
+14. Manual balance changes must generate traceable adjustment records.
+15. Expenses must decrease the account used to pay them.
+16. Fees must not be counted multiple times.
+17. Historical balances must be calculated from dated financial records.
+18. All financial changes must be saved persistently.
+19. Dashboard charts must never rely on fake or hardcoded numbers.
+20. Transactions must be validated and saved atomically wherever multiple financial records are affected.
+
+---
+
+## 16. Interface and User Experience
+
+Keep the application visually modern, polished, and professional.
+
+### Branding
+
+Application name: Xavinex Management
+
+Design:
+
+- Premium enterprise financial dashboard
+- Clean white background
+- Navy and blue primary colors
+- Subtle orange highlights
+- Modern typography
+- Rounded cards
+- Professional charts
+- Consistent icons
+- Responsive layout
+
+### Navigation
+
+- Dashboard
+- Clients
+- Projects
+- Business Pipeline
+- Fiverr Accounts
+- Payoneer Accounts
+- Bank & Cash
+- Fund Transfers
+- Expenses
+- Analytics
+- Reports
+- Settings
+
+### Important Interaction Improvements
+
+- Searchable client selection
+- Automatic Fiverr account display
+- Separate source and destination account panels
+- Account-type identification in dropdowns
+- Real-time transfer calculation previews
+- Editable balances
+- Confirmation dialogs
+- Transaction history drawers
+- Clear validation messages
+- Accurate empty states
+- Global date filters
+- Smooth and responsive navigation
+
+---
+
+## 17. Database and Backend Requirements
+
+Use a reliable persistent relational database such as PostgreSQL through Supabase.
+
+The application must store all manually entered information.
+
+Recommended database entities:
+
+- Admin
+- Clients
+- Projects
+- Financial Accounts
+- Client Payments
+- Account Transactions
+- Transfers
+- Transfer Fees
+- Expense Categories
+- Expenses
+- Exchange Rates
+- Balance Adjustments
+- Audit Logs
+- Settings
+
+### Database Relationships
+
+- One client can have many projects.
+- Each client has one default linked Fiverr account.
+- Each project stores its linked Fiverr account.
+- Each project can receive multiple payments.
+- Payments may be credited to Fiverr or directly to Payoneer.
+- One account can have many transactions.
+- Transfers connect one source account with one destination account.
+- Expenses reference the account that paid them.
+- Balance adjustments belong to a financial account.
+
+Use foreign keys and database constraints.
+
+Financial amounts must use decimal-safe storage and calculations.
+
+Never rely on frontend state alone for financial consistency.
+
+All transfers and balance-changing transactions should be handled through server-side transactional operations.
+
+---
+
+## 18. Testing and Acceptance Criteria
+
+The following scenarios must work correctly.
+
+### Test 1 — Empty Application
+
+Open the application after data cleanup.
+
+Expected:
+
+- No clients
+- No projects
+- No accounts
+- No expenses
+- No transfers
+- Zero balances
+- Empty chart states
+
+### Test 2 — Add Fiverr Account
+
+Create a Fiverr account named Salman with an opening balance of $500.
+
+Expected:
+
+- Fiverr account exists.
+- Current balance: $500.
+- Account appears in relevant dropdowns.
+
+### Test 3 — Add Payoneer Account
+
+Create a Payoneer account named Abdur Rahman with an opening balance of $100.
+
+Expected:
+
+- Payoneer balance: $100.
+- Account appears in eligible destination dropdowns.
+
+### Test 4 — Create Client
+
+Create client Abdur Rahman and link Salman Fiverr.
+
+Expected:
+
+- Client profile created.
+- Salman Fiverr linked to the client.
+
+### Test 5 — Create Project
+
+Create a $1,000 project for Abdur Rahman.
+
+Expected:
+
+- Salman Fiverr selected automatically.
+- $1,000 booked business.
+- $1,000 outstanding receivable.
+- No automatic account balance increase.
+
+### Test 6 — Direct Payoneer Payment
+
+Record a $200 client payment credited to Abdur Rahman Payoneer.
+
+Expected:
+
+- Project outstanding becomes $800.
+- Payoneer increases from $100 to $300.
+- Salman Fiverr remains $500.
+- Client payment history records $200.
+- No internal transfer is created.
+
+### Test 7 — Fiverr-to-Payoneer Transfer
+
+Transfer $200 from Salman Fiverr to Abdur Rahman Payoneer.
+
+Actual destination credit: $160.
+
+Expected:
+
+- Salman Fiverr: $300.
+- Abdur Rahman Payoneer: $460.
+- Difference: $40.
+- Deduction: 20%.
+- Transfer history updated.
+- Project outstanding remains $800.
+
+### Test 8 — Reject Fiverr-to-Fiverr Transfer
+
+Select Salman Fiverr as source.
+
+Attempt to select another Fiverr account as destination.
+
+Expected:
+
+- Fiverr destination option unavailable.
+- Backend rejects any attempted Fiverr-to-Fiverr transfer.
+
+### Test 9 — Payoneer-to-Payoneer Transfer
+
+Add another Payoneer account.
+
+Transfer $100 from Payoneer A.
+
+Destination Payoneer receives $95.
+
+Expected:
+
+- Source decreases by $100.
+- Destination increases by $95.
+- Deduction: $5, or 5%.
+- Transaction recorded successfully.
+
+### Test 10 — Manual Balance Editing
+
+Current Payoneer balance: $460.
+
+Edit it to $500.
+
+Expected:
+
+- New balance: $500.
+- Adjustment: +$40.
+- History records the change.
+- Reports reflect the adjustment.
+- Previous transactions remain intact.
+
+### Test 11 — Expense Recording
+
+Record a $50 office expense paid from Payoneer.
+
+Expected:
+
+- Payoneer decreases by $50.
+- Company expense increases by $50.
+- Monthly expense chart updates.
+
+### Test 12 — Charts With Real Data
+
+Add records across January, February and March.
+
+Expected:
+
+- Line graphs show actual values.
+- Month-end balance calculations are correct.
+- Business booked and collected payments are separate.
+- Transfer fees are counted once.
+- No hardcoded chart values appear.
+
+---
+
+## 19. Technical Quality Requirements
+
+Build a complete, working application.
+
+Requirements:
+
+- Full frontend and backend functionality
+- Persistent database
+- Secure admin authentication
+- Proper form validation
+- Reliable account balance calculations
+- Database-level integrity
+- Atomic financial transfers
+- Search and filtering
+- Responsive dashboard
+- Interactive charts
+- Complete transaction histories
+- Accurate reports
+- Clear empty states
+- Error handling
+- Financial correction and audit mechanisms
+
+All account editing, client creation, project creation, payment recording, transfers, and expenses must function end to end.
+
+Do not leave buttons inactive or use mock implementations.
+
+---
+
+## 20. Final Implementation Instructions
+
+You are updating the existing Xavinex Management application.
+
+Follow these priorities in order:
+
+### Priority 1: Remove Dummy Data
+
+Clean all sample records, fabricated balances, seeded transactions, and static datasets.
+
+Keep the application structure, components, account types, expense categories and system configuration intact.
+
+Do not delete the admin account or database schema during cleanup.
+
+### Priority 2: Fix Client and Fiverr Linking
+
+Store the client's linked Fiverr account and automatically inherit it when projects are created.
+
+### Priority 3: Implement Direct Payoneer Payment Recording
+
+Allow client payments to be recorded directly against selected Payoneer accounts while preserving the associated Fiverr account for client/project attribution.
+
+### Priority 4: Implement Account Transfer Rules
+
+Support Fiverr-to-Payoneer and Payoneer-to-Payoneer transfers, block Fiverr-to-Fiverr transfers, and implement correct source/destination balance changes.
+
+### Priority 5: Make Account Balances Editable
+
+Provide opening-balance editing and manual balance adjustment functionality with complete transaction history.
+
+### Priority 6: Fix All Financial Calculations
+
+Ensure booked business, received payments, transfers, expenses, outstanding receivables, transfer deductions, and available balances are calculated independently and correctly.
+
+### Priority 7: Update Dashboards and Line Graphs
+
+Build all charts around real persisted data, with prominent line graphs for business growth, collections, account balances, transfers, conversion rates, and expenses.
+
+### Priority 8: Complete Testing
+
+Test every workflow described above and verify that all balances, charts, and reports reconcile correctly.
+
+## NON-NEGOTIABLE REQUIREMENTS
+
+- No dummy data.
+- No automatically inserted sample records.
+- No hardcoded financial statistics.
+- No fake charts.
+- All data must be entered by the admin.
+- All balances must be editable through auditable corrections.
+- Fiverr accounts must automatically link to new projects through their clients.
+- Direct client payments into Payoneer must be supported.
+- Fiverr-to-Fiverr transfers must be blocked.
+- The source and destination account types must be clearly visible.
+- Original transfer amounts and actual credited amounts must be separately editable before posting.
+- Every financial transaction must update the appropriate accounts.
+- All financial charts must use actual saved records.
+- Existing business management and expense features must remain functional.
+
+**Final Goal:** Build Xavinex Management into a reliable, fully connected internal business management and financial tracking platform that gives the administrator a complete and accurate picture of clients, projects, booked business, client payments, Fiverr and Payoneer transfers, expenses, historical balances, and company financial performance.
+
+Implement the entire workflow, not merely a visual redesign or static demonstration.

@@ -1,0 +1,6 @@
+{
+  "name": "Xavinex Management",
+  "description": "Comprehensive financial, client, project, and business management system for Xavinex with multi-account tracking, direct Payoneer payments, automated Fiverr linking, and audit-ready ledgers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

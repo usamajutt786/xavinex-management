@@ -1,0 +1,30 @@
+{
+  "name": "xavinex-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "scripts": {
+    "dev": "node dev.js --api-only",
+    "start": "node server.js",
+    "mongo": "node local-mongo.js",
+    "db:status": "node storage-status.js",
+    "test": "node --test --test-concurrency=1 *.test.js",
+    "bootstrap": "node bootstrap.js",
+    "test:e2e": "npm --prefix ../xavinex-management run build && playwright test",
+    "test:atlas": "node verify-atlas.js",
+    "test:atlas:e2e": "npm --prefix ../xavinex-management run build && node verify-atlas.js --browser"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "mongodb": "^7.7.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}
