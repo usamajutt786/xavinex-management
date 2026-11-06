@@ -24,6 +24,10 @@ export interface Client {
   email?: string;
   country?: string;
   phone?: string;
+  address?: string;
+  linkedinUrl?: string;
+  otherProfile?: string;
+  liveProjectUrl?: string;
   notes?: string;
   createdAt: string;
 }

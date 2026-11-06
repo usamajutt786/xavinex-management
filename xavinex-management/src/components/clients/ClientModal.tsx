@@ -30,6 +30,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
   const [email, setEmail] = useState('');
   const [country, setCountry] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [otherProfile, setOtherProfile] = useState('');
+  const [liveProjectUrl, setLiveProjectUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
 
@@ -43,6 +47,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setEmail(clientToEdit.email || '');
       setCountry(clientToEdit.country || '');
       setPhone(clientToEdit.phone || '');
+      setAddress(clientToEdit.address || '');
+      setLinkedinUrl(clientToEdit.linkedinUrl || '');
+      setOtherProfile(clientToEdit.otherProfile || '');
+      setLiveProjectUrl(clientToEdit.liveProjectUrl || '');
       setNotes(clientToEdit.notes || '');
     } else {
       setName('');
@@ -53,6 +61,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       setEmail('');
       setCountry('');
       setPhone('');
+      setAddress(''); setLinkedinUrl(''); setOtherProfile(''); setLiveProjectUrl('');
       setNotes('');
     }
     setError('');
@@ -94,6 +103,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({
       email: email.trim() || undefined,
       country: country.trim() || undefined,
       phone: phone.trim() || undefined,
+      address: address.trim() || undefined,
+      linkedinUrl: linkedinUrl.trim() || undefined,
+      otherProfile: otherProfile.trim() || undefined,
+      liveProjectUrl: liveProjectUrl.trim() || undefined,
       notes: notes.trim() || undefined,
     });
 
@@ -246,6 +259,26 @@ export const ClientModal: React.FC<ClientModalProps> = ({
               <option value="inactive">Inactive Client</option>
             </select>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="block text-xs font-semibold text-slate-700">Phone Number (Optional)
+            <input type="tel" autoComplete="tel" value={phone} onChange={e => setPhone(e.target.value)} maxLength={100} placeholder="e.g. +92 300 1234567" className="mt-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-hidden" />
+          </label>
+          <label className="block text-xs font-semibold text-slate-700">LinkedIn Profile URL (Optional)
+            <input type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} maxLength={2048} placeholder="https://www.linkedin.com/in/..." className="mt-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-hidden" />
+          </label>
+          <label className="block text-xs font-semibold text-slate-700">Live Project Link (Optional)
+            <input type="url" value={liveProjectUrl} onChange={e => setLiveProjectUrl(e.target.value)} maxLength={2048} placeholder="https://example.com" className="mt-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-hidden" />
+          </label>
+          <div>
+            <label htmlFor="client-other-profile" className="block text-xs font-semibold text-slate-700">Any Other Profile (Optional)</label>
+            <textarea id="client-other-profile" rows={2} value={otherProfile} onChange={e => setOtherProfile(e.target.value)} maxLength={5000} placeholder="Other profile links or details" className="mt-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-hidden resize-none" />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="client-address" className="block text-xs font-semibold text-slate-700">Exact Address (Optional)</label>
+          <textarea id="client-address" rows={2} autoComplete="street-address" value={address} onChange={e => setAddress(e.target.value)} maxLength={5000} placeholder="Street, building, city, postal code..." className="mt-1 w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-hidden resize-none" />
         </div>
 
         <div>

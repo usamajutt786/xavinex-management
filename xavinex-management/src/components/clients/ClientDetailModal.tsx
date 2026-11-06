@@ -191,6 +191,14 @@ export const ClientDetailModal: React.FC<ClientDetailModalProps> = ({
             </div>
           )}
 
+          {(client.address || client.linkedinUrl || client.liveProjectUrl || client.otherProfile) && (
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+              {client.address && <div><dt className="text-slate-400">Address:</dt><dd className="whitespace-pre-wrap break-words text-slate-800">{client.address}</dd></div>}
+              {client.linkedinUrl && <div><dt className="text-slate-400">LinkedIn Profile:</dt><dd><a href={client.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{client.linkedinUrl}</a></dd></div>}
+              {client.liveProjectUrl && <div><dt className="text-slate-400">Live Project:</dt><dd><a href={client.liveProjectUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{client.liveProjectUrl}</a></dd></div>}
+              {client.otherProfile && <div><dt className="text-slate-400">Any Other Profile:</dt><dd className="whitespace-pre-wrap break-words text-slate-800">{client.otherProfile}</dd></div>}
+            </dl>
+          )}
           {client.notes && (
             <div className="pt-2 border-t border-slate-100">
               <span className="text-slate-400 block mb-0.5">Notes:</span>

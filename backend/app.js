@@ -6,7 +6,8 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { collections, readState, saveState, publicRecord, listRecords, storageStatus } from './database.js';
+import { collections, readState, saveState, publicRecord, listRecords, storageStatus, openDatabase } from './database.js';
+import { configuration } from './config.js';
 import { mutate, report } from './service.js';
 import { ApiError, requireThat, text, id } from './validation.js';
 import { digest, emailSchema, verifyPassword, hashPassword, passwordSchema, createUser, registerUser, publicUser, sessionMiddleware, issueSession, roleRequired, assertSession, audit } from './auth.js';
@@ -210,3 +211,35 @@ export function createApp(db, options = {}) {
   });
   return app;
 }
+
+// Vercel detects app.js before server.js. Export a real Express application,
+// initialize MongoDB on demand and share initialization across concurrent cold
+// requests. The regular local server continues using createApp(db, options).
+export function createDeploymentApp(initialize = async () => {
+  const config = configuration();
+  const db = await openDatabase(config.mongoUri);
+  try { return createApp(db, config); }
+  catch (error) { await db.close(); throw error; }
+}) {
+  const application = express();
+  application.disable('x-powered-by');
+  let initialization;
+  application.use(async (req, res, next) => {
+    try {
+      if (!initialization) {
+        const pending = Promise.resolve().then(initialize);
+        initialization = pending;
+        pending.catch(() => { if (initialization === pending) initialization = undefined; });
+      }
+      const ready = await initialization;
+      ready(req, res, next);
+    } catch (error) {
+      console.error(JSON.stringify({ event: 'api_initialization_failed', error: error.name, code: error.code }));
+      res.set('Cache-Control', 'no-store');
+      res.status(503).json({ error: { message: 'The API could not initialize. Check backend environment variables and MongoDB connectivity in the deployment logs.' } });
+    }
+  });
+  return application;
+}
+
+export default createDeploymentApp();

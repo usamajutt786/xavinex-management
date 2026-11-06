@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { MongoClient } from 'mongodb';
 import { testUri } from './test-database.js';
+import { createRequire } from 'node:module';
+const ExcelJS = createRequire(import.meta.url)('../xavinex-management/node_modules/exceljs');
 
 async function verifyMongoDocuments(snapshot) {
   const { databaseName } = JSON.parse(await readFile(new URL('./.e2e-database.json', import.meta.url), 'utf8'));
@@ -213,6 +215,19 @@ test('login reports backend unavailability and offers a working retry', async ({
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled();
 });
 
+test('login automatically reconnects after an API outage and preserves entered credentials', async ({ page }) => {
+  await page.route('**/api/auth/status', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: { message: 'The backend is starting or reconnecting. Please retry shortly.' } }) }));
+  await page.goto('/');
+  await expect(page.getByRole('alert')).toContainText('reconnecting');
+  await page.getByLabel('Email', { exact: true }).fill('connection-test@example.com');
+  await page.getByLabel('Password', { exact: true }).fill('Preserved-password-123!');
+  await page.unroute('**/api/auth/status');
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled({ timeout: 15000 });
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('connection-test@example.com');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('Preserved-password-123!');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
 test('account edits, balance corrections, ledger exports, client profile and project edits persist', async ({ page }) => {
   test.setTimeout(180000);
   await signIn(page);
@@ -398,4 +413,80 @@ test('browser company signup, isolation, logout and account switching never reta
     await expect(a.getByText('Only Company A Fiverr', { exact: true })).toBeVisible();
     await expect(a.getByText('Only Company B Fiverr', { exact: true })).toHaveCount(0);
   } finally { await contextA.close(); await contextB.close(); }
+});
+
+test('optional client fields create, edit and persist; Excel exports every latest client into one worksheet', async ({ page }) => {
+  test.setTimeout(120000);
+  await signIn(page);
+  const session = await (await page.request.get('/api/auth/me')).json();
+  const headers = { 'X-CSRF-Token': session.csrfToken, Origin: 'http://127.0.0.1:4101' };
+  const accountResponse = await page.request.post('/api/accounts', { data: { name: 'Excel profile test account', type: 'fiverr', currency: 'USD', openingBalance: 0, status: 'active' }, headers });
+  expect(accountResponse.ok()).toBe(true);
+  const account = (await accountResponse.json()).data;
+  const minimal = await page.request.post('/api/clients', { data: { name: 'Excel Blank Client', linkedFiverrAccountId: account.id, status: 'active' }, headers });
+  expect(minimal.ok()).toBe(true);
+  await page.reload();
+  await page.getByRole('button', { name: 'Clients', exact: true }).click();
+  await page.getByRole('button', { name: 'Add Client', exact: true }).click();
+  const form = page.locator('form').last();
+  await form.locator('input[type="text"]').nth(0).fill('Excel Profile Client');
+  await form.locator('input[type="text"]').nth(1).fill('@excel_client');
+  await form.locator('input[type="text"]').nth(2).fill('Excel Company');
+  await form.locator('input[type="email"]').fill('excel-client@example.com');
+  await form.locator('input[type="text"]').nth(3).fill('Pakistan');
+  await form.getByLabel('Phone Number (Optional)', { exact: true }).fill('+92 0300 0012345');
+  await form.getByLabel('Exact Address (Optional)', { exact: true }).fill('Office 3, Main Road\nLahore, پاکستان');
+  await form.getByLabel('LinkedIn Profile URL (Optional)', { exact: true }).fill('https://www.linkedin.com/in/excel-client/');
+  await form.getByLabel('Live Project Link (Optional)', { exact: true }).fill('https://example.com/client-project');
+  await form.getByLabel('Any Other Profile (Optional)', { exact: true }).fill('https://github.com/excel-client');
+  await form.getByRole('button', { name: 'Create Client', exact: true }).click();
+  await expect(page.getByText('Excel Profile Client', { exact: true })).toBeVisible();
+  const state = await (await page.request.get('/api/state')).json();
+  const client = state.clients.find(c => c.name === 'Excel Profile Client');
+  expect(client).toMatchObject({ phone: '+92 0300 0012345', address: 'Office 3, Main Road\nLahore, پاکستان', linkedinUrl: 'https://www.linkedin.com/in/excel-client/', liveProjectUrl: 'https://example.com/client-project', otherProfile: 'https://github.com/excel-client' });
+  await verifyMongoDocuments(state);
+  // Narrow the UI, then open its sole edit button and change an optional field.
+  await page.getByPlaceholder('Search by client, company, Fiverr...').fill('Excel Profile Client');
+  await page.getByTitle('Edit Client', { exact: true }).click();
+  await expect(form.getByLabel('Phone Number (Optional)', { exact: true })).toHaveValue(client.phone);
+  await form.getByLabel('Phone Number (Optional)', { exact: true }).fill('+92 0300 0099999');
+  await form.getByLabel('Any Other Profile (Optional)', { exact: true }).fill('');
+  await form.getByRole('button', { name: 'Save Client', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Edit Client Profile' })).toHaveCount(0);
+  await page.reload();
+  await page.getByRole('button', { name: 'Clients', exact: true }).click();
+  await page.getByPlaceholder('Search by client, company, Fiverr...').fill('Excel Profile Client');
+  await page.getByRole('button', { name: 'View Profile', exact: true }).click();
+  await expect(page.getByRole('link', { name: client.linkedinUrl, exact: true })).toHaveAttribute('href', client.linkedinUrl);
+  await expect(page.getByRole('dialog')).toContainText('+92 0300 0099999');
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  // Simulate another session changing data immediately before export, before
+  // the visible list polls: the downloaded workbook must use the saved value.
+  const { csrfToken } = await (await page.request.get('/api/auth/me')).json();
+  const patch = await page.request.patch('/api/clients/' + client.id, { data: { liveProjectUrl: 'https://example.com/latest-project', notes: '=SUM(1,2)' }, headers: { 'X-CSRF-Token': csrfToken, Origin: 'http://127.0.0.1:4101' } });
+  expect(patch.ok()).toBe(true);
+  const latest = await (await page.request.get('/api/state')).json();
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export Excel', exact: true }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^Xavinex_Clients_\d{4}-\d{2}-\d{2}\.xlsx$/);
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(await download.path());
+  expect(workbook.worksheets).toHaveLength(1);
+  const sheet = workbook.worksheets[0];
+  const columnHeaders = sheet.getRow(1).values.slice(1);
+  expect(columnHeaders.slice(0, 10)).toEqual(['Client Name', 'Fiverr Username', 'Company Name', 'Email Address', 'Country', 'Phone Number', 'Address', 'LinkedIn Profile URL', 'Live Project Link', 'Any Other Profile']);
+  expect(sheet.rowCount).toBe(latest.clients.length + 1);
+  let row;
+  sheet.eachRow((candidate, number) => { if (number > 1 && candidate.getCell(1).value === client.name) row = candidate; });
+  expect(row).toBeTruthy();
+  const value = header => row.getCell(columnHeaders.indexOf(header) + 1).value;
+  expect(value('Phone Number')).toBe('+92 0300 0099999');
+  expect(value('Address')).toBe(client.address);
+  expect(value('LinkedIn Profile URL')).toBe(client.linkedinUrl);
+  expect(value('Live Project Link')).toBe('https://example.com/latest-project');
+  expect(value('Any Other Profile') || '').toBe('');
+  expect(value('Notes')).toBe('=SUM(1,2)');
+  expect(row.getCell(columnHeaders.indexOf('Notes') + 1).type).toBe(ExcelJS.ValueType.String);
+  await verifyMongoDocuments(latest);
 });

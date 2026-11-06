@@ -11,8 +11,12 @@ export const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s => { const 
 const timestamp = z.iso.datetime();
 const meta = { id, createdAt: timestamp };
 const status = z.enum(['active', 'inactive']);
+const optionalWebUrl = z.string().trim().max(2048).refine(value => {
+  if (!value) return true;
+  try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; }
+}, 'Enter a valid http:// or https:// URL').optional();
 export const accountInput = z.object({ name: text, type: accountTypes, currency: currencies, openingBalance: money, status, notes: optionalText }).strict();
-export const clientInput = z.object({ name: text, linkedFiverrAccountId: id, status, fiverrUsername: optionalText, companyName: optionalText, email: z.union([z.email(), z.literal('')]).optional(), country: optionalText, phone: optionalText, notes: optionalText }).strict();
+export const clientInput = z.object({ name: text, linkedFiverrAccountId: id, status, fiverrUsername: optionalText, companyName: optionalText, email: z.union([z.email(), z.literal('')]).optional(), country: optionalText, phone: optionalText, address: optionalText, linkedinUrl: optionalWebUrl, otherProfile: optionalText, liveProjectUrl: optionalWebUrl, notes: optionalText }).strict();
 export const projectInput = z.object({ name: text, clientId: id, budget: positiveMoney, currency: currencies, bookingDate: date, expectedCompletionDate: z.union([date, z.literal('')]).transform(v => v || undefined).optional(), status: z.enum(['queued', 'in_progress', 'on_hold', 'completed', 'cancelled']), notes: optionalText }).strict();
 export const paymentInput = z.object({ clientId: id, projectId: id, paymentAmount: positiveMoney, currency: currencies, paymentDate: date, receivingAccountId: id, paymentRoute: z.enum(['fiverr', 'payoneer_direct', 'bank_direct']), actualCreditedAmount: positiveMoney.optional(), feeOrDeduction: money.optional(), description: optionalText, notes: optionalText }).strict();
 export const transferInput = z.object({ sourceAccountId: id, destinationAccountId: id, transferDate: date, sourceAmount: positiveMoney, destinationCreditedAmount: positiveMoney, feeCategory: optionalText, notes: optionalText }).strict();

@@ -1,0 +1,5 @@
+.env
+.env.*
+*.test.mjs
+test-results/**
+*.log

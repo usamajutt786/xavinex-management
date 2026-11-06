@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { createHash, randomUUID } from 'node:crypto';
 import { ApiError } from './validation.js';
 import { businessDate } from './dates.js';
+import { atlasConnectionUri } from './mongo-connection.js';
 
 export const collections = ['accounts', 'clients', 'projects', 'payments', 'transfers', 'expenses', 'adjustments', 'transactions'];
 // Some Atlas deployments allow only 38 bytes. Include the control database in
@@ -45,7 +46,7 @@ export async function storageStatus(db) {
 }
 
 export async function openDatabase(uri, options = {}) {
-  const client = options.client || new MongoClient(uri, {
+  const client = options.client || new MongoClient(await atlasConnectionUri(uri), {
     serverSelectionTimeoutMS: 5000, connectTimeoutMS: 5000, maxPoolSize: 20,
     ignoreUndefined: true, appName: 'Xavinex Management', ...options.clientOptions,
   });

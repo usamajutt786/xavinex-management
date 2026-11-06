@@ -393,3 +393,27 @@ test('direct bank payments validate accounts, credit net receipts once, reconcil
   await ok('/restore', 'POST', snapshot);
   assert.deepEqual(await ok('/state'), snapshot);
 });
+
+test('optional client contacts and profiles persist, remain editable, clear correctly and survive backups', async () => {
+  const f = await create('/accounts', account('Client profile Fiverr'));
+  const baseClient = { name: 'Profile Client', linkedFiverrAccountId: f.id, status: 'active' };
+  const c = await create('/clients', baseClient);
+  const fields = { phone: '+92 0300 0012345', address: 'Office 3, Main Road\nLahore, پاکستان', linkedinUrl: 'https://www.linkedin.com/in/test-client/', otherProfile: 'https://github.com/test-client\nOther contact notes', liveProjectUrl: 'https://example.com/project?client=test&live=1' };
+  await ok('/clients/' + c.id, 'PATCH', fields);
+  const saved = await ok('/clients/' + c.id);
+  for (const [key, value] of Object.entries(fields)) {
+    assert.equal(saved[key], value);
+    assert.equal((await db.collection('clients').findOne({ _id: c.id }))[key], value);
+  }
+  for (const value of ['javascript:alert(1)', 'data:text/html,test', 'ftp://example.com', 'not-a-url']) assert.equal((await request('/clients/' + c.id, 'PATCH', { linkedinUrl: value })).status, 422);
+  assert.equal((await request('/clients/' + c.id, 'PATCH', { liveProjectUrl: 'javascript:alert(1)' })).status, 422);
+  assert.deepEqual(await ok('/clients/' + c.id), saved);
+  const backup = await ok('/backup');
+  await ok('/restore', 'POST', backup);
+  assert.deepEqual(await ok('/clients/' + c.id), saved);
+  await ok('/clients/' + c.id, 'PATCH', Object.fromEntries(Object.keys(fields).map(key => [key, ''])));
+  const cleared = await ok('/clients/' + c.id);
+  for (const key of Object.keys(fields)) assert.equal(cleared[key], '');
+  const createdWithFields = await create('/clients', { ...baseClient, name: 'Full Profile Client', ...fields });
+  for (const [key, value] of Object.entries(fields)) assert.equal(createdWithFields[key], value);
+});

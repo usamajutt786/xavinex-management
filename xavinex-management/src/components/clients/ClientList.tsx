@@ -1,6 +1,7 @@
 import { convertToUSD } from '../../utils/formatters';
 import { useData } from '../../context/DataContext';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { api } from '../../api';
 import { Client, Project, ClientPayment, FinancialAccount } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { exportToCSV } from '../../utils/export';
@@ -67,6 +68,23 @@ export const ClientList: React.FC<ClientListProps> = ({
   const [sortBy, setSortBy] = useState<SortOption>('booked_desc');
   const [volumeFilter, setVolumeFilter] = useState<VolumeFilter>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const handleExportExcel = async () => {
+    if (exporting) return;
+    setExporting(true); setExportError('');
+    try {
+      // Fetch a fresh company-scoped snapshot: export all saved clients even
+      // when the on-screen list is filtered or another session updated a client.
+      const snapshot = await api<{ clients: Client[]; accounts: FinancialAccount[] }>('/state');
+      const { createClientExcel, downloadClientExcel } = await import('../../utils/clientExcel');
+      const buffer = await createClientExcel(snapshot.clients, snapshot.accounts);
+      if (mounted.current) downloadClientExcel(buffer);
+    } catch (error) { if (mounted.current) setExportError((error as Error).message); }
+    finally { if (mounted.current) setExporting(false); }
+  };
 
   // Compute enriched client data with financial statistics
   const enrichedClients = useMemo(() => {
@@ -159,12 +177,18 @@ export const ClientList: React.FC<ClientListProps> = ({
       Status: c.status,
       Email: c.email || '',
       Country: c.country || '',
+      Phone_Number: c.phone || '',
+      Address: c.address || '',
+      LinkedIn_Profile_URL: c.linkedinUrl || '',
+      Live_Project_Link: c.liveProjectUrl || '',
+      Any_Other_Profile: c.otherProfile || '',
     }));
     exportToCSV('Xavinex_Clients_Report', rows);
   };
 
   return (
     <div className="space-y-4">
+      {exportError && <p role="alert" className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{exportError}</p>}
       {/* Client Overview Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
@@ -304,6 +328,11 @@ export const ClientList: React.FC<ClientListProps> = ({
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             Export CSV
+          </button>
+
+          <button onClick={() => void handleExportExcel()} disabled={exporting} title="Export all saved clients with their latest details" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors cursor-pointer shadow-2xs">
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            {exporting ? 'Exporting…' : 'Export Excel'}
           </button>
 
           <button

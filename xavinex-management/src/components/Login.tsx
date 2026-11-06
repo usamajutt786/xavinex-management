@@ -23,6 +23,11 @@ export function Login({ onLogin }: { onLogin: (user: User) => void }) {
     finally { setChecking(false); }
   };
   useEffect(() => { void checkStatus(); }, []);
+  useEffect(() => {
+    if (checking || status || busy) return;
+    const timer = window.setTimeout(() => void checkStatus(), 3000);
+    return () => window.clearTimeout(timer);
+  }, [checking, status, busy]);
   const signup = mode === 'signup';
   const inputClass = 'mt-1 block w-full border rounded-lg p-3';
   return <main className="min-h-screen bg-slate-100 flex items-center justify-center p-6">

@@ -8,7 +8,7 @@ if (!config.MONGODB_URI?.startsWith('mongodb+srv://')) throw new Error('Configur
 const env = { ...process.env, TEST_MONGODB_URI: config.MONGODB_URI };
 // Only generated xavinex_test_* / xavinex_e2e_* databases are used and dropped.
 if (!process.argv.includes('--browser-only')) {
-  const api = spawn(process.execPath, ['--test', '--test-concurrency=1', 'api.test.js', 'legacy-balances.test.js', 'storage-names.test.js', 'tenancy.test.js'], { cwd: import.meta.dirname, env, stdio: 'inherit', windowsHide: true });
+  const api = spawn(process.execPath, ['--test', '--test-concurrency=1', 'api.test.js', 'legacy-balances.test.js', 'mongo-connection.test.js', 'storage-names.test.js', 'tenancy.test.js'], { cwd: import.meta.dirname, env, stdio: 'inherit', windowsHide: true });
   const [apiCode] = await once(api, 'exit');
   if (apiCode !== 0) process.exit(apiCode || 1);
 }

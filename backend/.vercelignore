@@ -1,0 +1,9 @@
+.env
+.env.*
+.mongo-data/**
+*.log
+test-results/**
+*.test.js
+e2e*.js
+playwright.config.js
+verify-atlas.js

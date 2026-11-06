@@ -45,9 +45,11 @@ async function startBackend() {
   const config = configuration(environment());
   await ensureLocalMongo(config.mongoUri, { enabled: environment().LOCAL_MONGO !== 'false' });
   backend = launch([resolve(import.meta.dirname, 'server.js')], import.meta.dirname);
-  for (let attempt = 0; attempt < 80; attempt++) {
+  const startupDeadline = Date.now() + 90000;
+  for (; Date.now() < startupDeadline;) {
     if (stopping) return;
-    try { const response = await fetch(`http://127.0.0.1:${config.port}/api/health`); if (response.ok) return; } catch { /* Backend is starting. */ }
+    if (backend.exitCode !== null) throw new Error('Backend exited during startup; see the error above.');
+    try { const response = await fetch(`http://127.0.0.1:${config.port}/api/health`, { signal: AbortSignal.timeout(2000) }); if (response.ok) return; } catch { /* Backend is starting. */ }
     await new Promise(resolvePromise => setTimeout(resolvePromise, 250));
   }
   throw new Error('Backend startup failed; see the error above.');
@@ -63,7 +65,7 @@ try {
     console.log(`Reusing running Xavinex API on port ${config.port}.`);
   } else {
     await startBackend();
-    const watched = new Set(['.env', 'server.js', 'app.js', 'auth.js', 'database.js', 'dates.js', 'service.js', 'validation.js', 'config.js']);
+    const watched = new Set(['.env', 'server.js', 'app.js', 'auth.js', 'database.js', 'mongo-connection.js', 'dates.js', 'service.js', 'validation.js', 'config.js']);
     let restarting = false;
     let restartRequested = false;
     fileWatcher = watch(import.meta.dirname, (_event, filename) => {

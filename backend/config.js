@@ -13,7 +13,7 @@ export function ensureLocalEnvironment() {
   }
   loadEnvFile(envPath);
 }
-if (existsSync(envPath)) loadEnvFile(envPath);
+if (process.env.VERCEL !== '1' && existsSync(envPath)) loadEnvFile(envPath);
 
 export function configuration(env = process.env) {
   const port = Number(env.PORT || 4000);

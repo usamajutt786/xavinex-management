@@ -82,7 +82,7 @@ export const KPIGrid: React.FC<KPIGridProps> = ({
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-300">
-                Total Current Balance
+                net Worth
               </span>
             </div>
             <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-blue-300 backdrop-blur-md">

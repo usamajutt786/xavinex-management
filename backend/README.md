@@ -1,5 +1,7 @@
 # Xavinex Management backend
 
+For the two Vercel projects, see [VERCEL_DEPLOYMENT.md](../VERCEL_DEPLOYMENT.md). The default Express export in `app.js` is the serverless entry point; `server.js` remains the local/container listener.
+
 Node.js/Express with MongoDB persistence, authenticated APIs and the existing React frontend. All backend source files remain directly in this folder. The current `.env` selects local MongoDB on port 27018. The former Atlas database is left untouched; its records are not implicitly copied into the local database. Credentials are never included in examples or source control.
 
 ## Start the application
@@ -14,6 +16,8 @@ npm run dev
 Open **http://localhost:3000**. This single command starts the API on port 4000 and the frontend on 3000, waiting for database/API readiness first. `npm run dev` in the frontend folder also starts the complete system. `npm run dev` in this backend folder starts the API only. `npm run dev:frontend` in the frontend folder is available when you deliberately manage the API separately.
 
 The launcher reuses an existing Xavinex API or frontend listener instead of killing user processes. When it owns the API process, changes to backend source or `.env` restart it. The development proxy reads `PORT`/optional `API_PROXY_TARGET` from `backend/.env`. Use the configured origin (`localhost:3000` by default); development also accepts `127.0.0.1:3000`. Production only accepts the exact configured origin.
+
+The launcher allows up to 90 seconds for database connection/index initialization and bounds each health probe. Public Atlas SRV/TXT records use a bounded system DNS lookup; on transient DNS failures, the backend tries Google and Cloudflare DNS over HTTPS. Only the public cluster hostname is sent, never credentials or application records. The resolved connection retains the configured database, authentication options and TLS. Private/non-Atlas addresses use the normal driver resolution path. This avoids login outages on networks whose DNS server times out on Atlas TXT records without editing the configured URI or the operating system's DNS settings.
 
 Choose **Sign up** and enter your email, password (12–128 characters), and company name. Signup creates an isolated company workspace, makes you its administrator, and signs you in. Later, sign in using your email and password. The server derives the display name from the email, normalizes email case/whitespace, hashes passwords using scrypt, and stores users in MongoDB. Duplicate emails return a conflict; invalid credentials return “Invalid email or password.” Signup and login are rate limited and sessions use HttpOnly cookies and CSRF protection.
 
